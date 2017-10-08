@@ -10,7 +10,37 @@ const Tea = db.define('tea', {
   price: Sequelize.INTEGER,
   category: Sequelize.ENUM('green', 'black', 'herbal')
 }, {
-  // add more functionality to our Tea model here!
-})
+    getterMethods: {
+      dollarPrice() {
+        return "$" + (this.price / 100).toFixed(2);
+      }
+    },
+    hooks: {
+      beforeCreate: (tea, options) => {
+        tea.title = tea.title.split(' ').map(function (word) {
+          return word[0].toUpperCase() + word.slice(1)
+        }).join(' ');
+
+      }
+    }
+  }
+)
+
+Tea.findByCategory = function (category) {
+  return Tea.findAll({
+    where: {
+      category: category
+    }
+  })
+}
+
+Tea.prototype.findSimilar = function () {
+  return Tea.findAll({
+    where: {
+      title: this.title
+    }
+  })
+}
+
 
 module.exports = { db, Tea };
